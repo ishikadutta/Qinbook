@@ -1,11 +1,19 @@
 package com.example.registration_qbook.service.impl;
 
+import com.example.registration_qbook.clients.LoginClient;
 import com.example.registration_qbook.dto.*;
 import com.example.registration_qbook.entity.UserDetails;
 import com.example.registration_qbook.entity.Users;
 import com.example.registration_qbook.repository.UserDetailsRepository;
 import com.example.registration_qbook.repository.UserRepository;
 import com.example.registration_qbook.service.RegisterService;
+import com.example.registration_qbook.util.CustomHash;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,15 +21,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 @Service
 public class RegisterServiceImpl implements RegisterService {
+
+    public static Properties getPropertiesOfKafka(){
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092");
+        props.put("acks", "all");
+        props.put("retries", 0);
+        props.put("linger.ms", 1);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+//        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        return props;
+    }
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private UserDetailsRepository userDetailsRepository;
+
+    @Autowired
+    private LoginClient loginClient;
 
     @Override
     public RegisterResponseDTO registerUser(RegisterRequestDTO userRequestDTO) {
@@ -35,15 +60,26 @@ public class RegisterServiceImpl implements RegisterService {
         }
         else{
             BeanUtils.copyProperties(userRequestDTO, users);
-            String password = userRequestDTO.getPassword();
-            users.setPassword(password);
+            String hashedpassword = CustomHash.hashString(userRequestDTO.getPassword());
+            hashedpassword = CustomHash.hashString(hashedpassword);
+            System.out.println(hashedpassword);
+            // String password = userRequestDTO.getPassword();
+            // users.setPassword(password);
             String[] username = userRequestDTO.getEmail().split("@",-1);
+            loginClient.insertIntoLogin(username[0],hashedpassword);
             userDetails.setUserName(username[0]);
             users.setUserName(username[0]);
             Users savedUsers = userRepository.save(users);
+            UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
             responseDTO.setMessage("Registration successful");
+            kafkaMethod("message");
         }
         return responseDTO;
+    }
+    private void kafkaMethod(String message){
+        Producer<String,String> producer = new KafkaProducer<>(getPropertiesOfKafka());
+        producer.send(new ProducerRecord<>("my-events",message));
+        producer.close();
     }
 
     @Override
@@ -97,27 +133,6 @@ public class RegisterServiceImpl implements RegisterService {
         UserDetails userDetailsFromDb = userDetailsRepository.findByUsername(userName);
         Users usersFromDb = userRepository.findDetailsByUsername(userName);
         System.out.println(userDetailsFromDb);
-        System.out.println(usersFromDb);
-//        userDetailsFromDb.setUserName(usersRequestDTO.getUserName());
-//        userDetailsFromDb.setAddress(usersRequestDTO.getAddress());
-//        userDetailsFromDb.setEducation10(usersRequestDTO.getEducation10());
-//        userDetailsFromDb.setEducation12(usersRequestDTO.getEducation12());
-//        userDetailsFromDb.setEducationUni(usersRequestDTO.getEducationUni());
-//        userDetailsFromDb.setJobProfile(usersRequestDTO.getJobProfile());
-//        userDetailsFromDb.setCompanyName(usersRequestDTO.getCompanyName());
-//        userDetailsFromDb.setJobLocation(usersRequestDTO.getJobLocation());
-//        userDetailsFromDb.setJobStartDate(usersRequestDTO.getJobStartDate());
-//        userDetailsFromDb.setJobEndDate(usersRequestDTO.getJobEndDate());
-//        userDetailsFromDb.setRelationshipStatus(usersRequestDTO.getRelationshipStatus());
-//        usersFromDb.setUserName(usersRequestDTO.getUserName());
-//        usersFromDb.setEmail(usersRequestDTO.getEmail());
-//        usersFromDb.setFirstName(usersRequestDTO.getFirstName());
-//        usersFromDb.setLastName(usersRequestDTO.getLastName());
-//        usersFromDb.setImg(usersRequestDTO.getImg());
-//        usersFromDb.setPassword(usersRequestDTO.getPassword());
-//        usersFromDb.setGender(usersRequestDTO.getGender());
-//        usersFromDb.setPhoneNo(usersRequestDTO.getPhoneNo());
-//        usersFromDb.setDateOfBirth(usersRequestDTO.getDateOfBirth());
         BeanUtils.copyProperties(usersRequestDTO, userDetailsFromDb);
         BeanUtils.copyProperties(usersRequestDTO,usersFromDb);
         userDetailsRepository.save(userDetailsFromDb);

@@ -1,15 +1,33 @@
 package com.example.registration_qbook.controller;
 
 import com.example.registration_qbook.dto.*;
+import com.example.registration_qbook.model.User;
 import com.example.registration_qbook.service.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+import com.example.registration_qbook.config.*;
+
 
 @CrossOrigin
 @RestController
 public class RegisterController {
+
+//    @Autowired
+//    private KafkaTemplate<Object, User> kafkaTemplate;
+//
+//    private static final String TOPIC="my-events";
+//
+//    @GetMapping("/publish/userName")
+//    public String post(@RequestParam("userName") final String userName){
+//        kafkaTemplate.send(TOPIC, new User(userName, 12 ,"sa"));
+//        return "puclisedd";
+//    }
+
+
     @Autowired
     private RegisterService registerService;
+
 
     @PostMapping("/register")
     public RegisterResponseDTO registerUser(@RequestBody RegisterRequestDTO registerRequestDTO){
