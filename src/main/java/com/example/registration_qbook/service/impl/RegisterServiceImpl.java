@@ -15,6 +15,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +71,9 @@ public class RegisterServiceImpl implements RegisterService {
             // String password = userRequestDTO.getPassword();
             // users.setPassword(password);
             String[] username = userRequestDTO.getEmail().split("@",-1);
-  //         loginClient.insertIntoLogin(username[0],hashedpassword);
+            loginClient.insertIntoLogin(username[0],hashedpassword);
             userDetails.setUserName(username[0]);
+            userDetails.setQuinbookJoinDate(LocalDate.now().toString());
             users.setUserName(username[0]);
             Users savedUsers = userRepository.save(users);
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
@@ -146,10 +148,11 @@ public class RegisterServiceImpl implements RegisterService {
         System.out.println(userDetailsFromDb);
         BeanUtils.copyProperties(usersRequestDTO, userDetailsFromDb);
         BeanUtils.copyProperties(usersRequestDTO,usersFromDb);
-        userDetailsRepository.save(userDetailsFromDb);
+        UserDetails savedDetails = userDetailsRepository.save(userDetailsFromDb);
         userRepository.save(usersFromDb);
         UpdateResponseDTO updateResponseDto = new UpdateResponseDTO();
         updateResponseDto.setMessage("Success");
+        kafkaMethod(savedDetails);
         return updateResponseDto;
 
     }
@@ -157,61 +160,69 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public List<EventResponseDTO> getEventDetails(List<String> userNameList) {
 
+      //  List<String> userNameList = requestDTO.getUserNameList();
         List<EventResponseDTO> responseDTOList = new ArrayList<>();
         List<Users> usersWithBirthday = userRepository.findUsersWithBirthday();
         List<UserDetails> usersWithAnniversary = userDetailsRepository.findUsersWithAnniversary();
 
+
         for (Users user : usersWithBirthday) {
-            EventResponseDTO responseDTO = new EventResponseDTO();
-            Users userDetails = userRepository.findDetailsByUsername(user.getUserName());
-            LocalDate date = LocalDate.now();
-            java.sql.Date userDate = userDetails.getDateOfBirth();
-            System.out.println("d " + date);
-            System.out.println("ud " + userDate);
-            String[] s = date.toString().split("-", 3);
-            String[] s2 = userDate.toString().split("-", 3);
-            String comp1 = s[1] + s[2];
-            String comp2 = s2[1] + s2[2];
-            if (comp1.equals(comp2)) {
-                responseDTO.setEventType("Happy Birthday"); //eventBirthday
-            }
-            int year1 = Integer.valueOf(s[0]);
-            int year2 = Integer.valueOf(s2[0]);
-            int age = year1 - year2; //age
+            String userName=user.getUserName();
+            if(userNameList.contains(userName)) {
+                EventResponseDTO responseDTO = new EventResponseDTO();
+                Users userDetails = userRepository.findDetailsByUsername(user.getUserName());
+                LocalDate date = LocalDate.now();
+                java.sql.Date userDate = userDetails.getDateOfBirth();
+                System.out.println("d " + date);
+                System.out.println("ud " + userDate);
+                String[] s = date.toString().split("-", 3);
+                String[] s2 = userDate.toString().split("-", 3);
+                String comp1 = s[1] + s[2];
+                String comp2 = s2[1] + s2[2];
+                if (comp1.equals(comp2)) {
+                    responseDTO.setEventType("Happy Birthday"); //eventBirthday
+                }
+                int year1 = Integer.valueOf(s[0]);
+                int year2 = Integer.valueOf(s2[0]);
+                int age = year1 - year2; //age
 
-            responseDTO.setImg(userDetails.getImg()); //setImg
-            responseDTO.setFullName(userDetails.getFirstName() + " " + userDetails.getLastName()); //setFullName
-            responseDTO.setUserName(userDetails.getUserName()); //setUserName
-            responseDTO.setYears(age); //setAge
-        //    BeanUtils.copyProperties(userDetails,responseDTO);
-            responseDTOList.add(responseDTO);
+                responseDTO.setImg(userDetails.getImg()); //setImg
+                responseDTO.setFullName(userDetails.getFirstName() + " " + userDetails.getLastName()); //setFullName
+                responseDTO.setUserName(userDetails.getUserName()); //setUserName
+                responseDTO.setYears(age); //setAge
+                //    BeanUtils.copyProperties(userDetails,responseDTO);
+                responseDTOList.add(responseDTO);
+            }
         }
-        for(UserDetails userDetails:usersWithAnniversary){
-            EventResponseDTO responseDTO = new EventResponseDTO();
-            UserDetails userDetails1 = userDetailsRepository.findByUsername(userDetails.getUserName());
-            LocalDate date = LocalDate.now();
-            java.sql.Date userDate = userDetails1.getMarriageAnniversary();
-            System.out.println("d " + date);
-            System.out.println("ud " + userDate);
-            String[] s = date.toString().split("-", 3);
-            String[] s2 = userDate.toString().split("-", 3);
-            String comp1 = s[1] + s[2];
-            String comp2 = s2[1] + s2[2];
-            if (comp1.equals(comp2)) {
-                responseDTO.setEventType("Happy Marriage Anniversary"); //eventAnniversary
+        for(UserDetails userDetails:usersWithAnniversary) {
+            String userName = userDetails.getUserName();
+            if (userNameList.contains(userName)) {
+                EventResponseDTO responseDTO = new EventResponseDTO();
+                UserDetails userDetails1 = userDetailsRepository.findByUsername(userDetails.getUserName());
+                LocalDate date = LocalDate.now();
+                java.sql.Date userDate = userDetails1.getMarriageAnniversary();
+                System.out.println("d " + date);
+                System.out.println("ud " + userDate);
+                String[] s = date.toString().split("-", 3);
+                String[] s2 = userDate.toString().split("-", 3);
+                String comp1 = s[1] + s[2];
+                String comp2 = s2[1] + s2[2];
+                if (comp1.equals(comp2)) {
+                    responseDTO.setEventType("Happy Marriage Anniversary"); //eventAnniversary
+                }
+                int year1 = Integer.valueOf(s[0]);
+                int year2 = Integer.valueOf(s2[0]);
+                int age = year1 - year2; //age
+
+                Users forFullName = userRepository.findDetailsByUsername(userDetails1.getUserName());
+                responseDTO.setImg(userDetails1.getImg()); //setImg
+                responseDTO.setFullName(forFullName.getFirstName() + " " + forFullName.getLastName()); //setFullName
+                responseDTO.setUserName(userDetails1.getUserName()); //setUserName
+                responseDTO.setYears(age); //setAge
+                //    BeanUtils.copyProperties(userDetails,responseDTO);
+                responseDTOList.add(responseDTO);
+
             }
-            int year1 = Integer.valueOf(s[0]);
-            int year2 = Integer.valueOf(s2[0]);
-            int age = year1 - year2; //age
-
-            Users forFullName = userRepository.findDetailsByUsername(userDetails1.getUserName());
-            responseDTO.setImg(userDetails1.getImg()); //setImg
-            responseDTO.setFullName(forFullName.getFirstName() + " " + forFullName.getLastName()); //setFullName
-            responseDTO.setUserName(userDetails1.getUserName()); //setUserName
-            responseDTO.setYears(age); //setAge
-            //    BeanUtils.copyProperties(userDetails,responseDTO);
-            responseDTOList.add(responseDTO);
-
         }
         return responseDTOList;
             }

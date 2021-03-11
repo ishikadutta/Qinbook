@@ -19,9 +19,9 @@ public class Users {
     @Column(unique = true)
     private String email;
     private String phoneNo;
-    private String password;
     private String userName;
     private String gender;
     private java.sql.Date dateOfBirth;
+    @Column(columnDefinition="TEXT")
     private String img;
 }

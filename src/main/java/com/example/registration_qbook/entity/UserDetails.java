@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -15,6 +16,7 @@ public class UserDetails {
     @GeneratedValue(generator="user_id_seq", strategy = GenerationType.AUTO)
     private long userId;
     private String userName;
+    @Column(columnDefinition="TEXT")
     private String img;
     private String relationshipStatus;
     private String education10;
@@ -29,10 +31,10 @@ public class UserDetails {
     private String jobLocation;
     private String address;
     private java.sql.Date marriageAnniversary;
-
-//    @Override
-//    public String toString() {
-//        return "userName:" + userName;
+    private String Hobbies;
+    private String quinbookJoinDate;
+    private String firstName;
+    private String lastName;
 
     @Override
     public String toString() {
@@ -51,9 +53,12 @@ public class UserDetails {
                 ", yearsOfExp=" + yearsOfExp +
                 ", jobLocation='" + jobLocation + '\'' +
                 ", address='" + address + '\'' +
-                ", marriageAnniversary='" + marriageAnniversary + '\'' +
+                ", marriageAnniversary=" + marriageAnniversary +
+                ", Hobbies='" + Hobbies + '\'' +
+                ", quinbookJoinDate='" + quinbookJoinDate + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 '}';
     }
-//    }
 
 }

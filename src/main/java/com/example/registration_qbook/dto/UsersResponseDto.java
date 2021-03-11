@@ -9,10 +9,10 @@ public class UsersResponseDto {
     private long userId;
     private String firstName;
     private String lastName;
-    private String email;
+//    private String email;
     private String phoneNo;
     private String password;
-    private String userName;
+ //   private String userName;
     private String gender;
     private java.sql.Date dateOfBirth;
     private String img;
@@ -28,4 +28,6 @@ public class UsersResponseDto {
     private int yearsOfExp;
     private String jobLocation;
     private java.sql.Date marriageAnniversary;
+    private String Hobbies;
+//    private String quinbookJoinDate;
 }
