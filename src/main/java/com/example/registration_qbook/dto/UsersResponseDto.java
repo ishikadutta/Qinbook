@@ -27,5 +27,5 @@ public class UsersResponseDto {
     private java.sql.Date jobEndDate;
     private int yearsOfExp;
     private String jobLocation;
-
+    private java.sql.Date marriageAnniversary;
 }

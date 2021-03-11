@@ -1,12 +1,11 @@
 package com.example.registration_qbook.controller;
 
 import com.example.registration_qbook.dto.*;
-import com.example.registration_qbook.model.User;
 import com.example.registration_qbook.service.RegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
-import com.example.registration_qbook.config.*;
+
+import java.util.List;
 
 
 @CrossOrigin
@@ -50,6 +49,13 @@ public class RegisterController {
     public UpdateResponseDTO updateUserByUsername(@RequestParam String userName , @RequestBody UsersRequestDTO usersRequestDTO){
         return registerService.updateUserByUsername(userName,usersRequestDTO);
     }
+
+    @GetMapping("/events")
+    public List<EventResponseDTO> getEventDetails(@RequestParam List<String> userNameList)
+    {
+        return registerService.getEventDetails(userNameList);
+    }
+
 
 
 }

@@ -2,6 +2,8 @@ package com.example.registration_qbook.service;
 
 import com.example.registration_qbook.dto.*;
 
+import java.util.List;
+
 public interface RegisterService {
     RegisterResponseDTO registerUser(RegisterRequestDTO userRequestDTO);
 
@@ -13,4 +15,6 @@ public interface RegisterService {
     DeleteResponseDTO deleteByUsername(String userName);
 
     UpdateResponseDTO updateUserByUsername(String userName, UsersRequestDTO usersRequestDTO);
+
+    List<EventResponseDTO> getEventDetails(List<String> userNameList);
 }

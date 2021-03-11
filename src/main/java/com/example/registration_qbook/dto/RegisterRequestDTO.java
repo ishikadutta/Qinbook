@@ -12,7 +12,7 @@ public class RegisterRequestDTO {
     private String phoneNo;
     private String password;
     private String gender;
-    private String dateOfBirth;
+    private java.sql.Date dateOfBirth;
     private String img;
 //    private String img;
 //    private String relationshipStatus;

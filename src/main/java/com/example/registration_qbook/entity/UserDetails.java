@@ -2,6 +2,7 @@ package com.example.registration_qbook.entity;
 
 
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -27,5 +28,32 @@ public class UserDetails {
     private Long yearsOfExp;
     private String jobLocation;
     private String address;
+    private java.sql.Date marriageAnniversary;
+
+//    @Override
+//    public String toString() {
+//        return "userName:" + userName;
+
+    @Override
+    public String toString() {
+        return "UserDetails{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", img='" + img + '\'' +
+                ", relationshipStatus='" + relationshipStatus + '\'' +
+                ", education10='" + education10 + '\'' +
+                ", education12='" + education12 + '\'' +
+                ", educationUni='" + educationUni + '\'' +
+                ", jobProfile='" + jobProfile + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", jobStartDate=" + jobStartDate +
+                ", jobEndDate=" + jobEndDate +
+                ", yearsOfExp=" + yearsOfExp +
+                ", jobLocation='" + jobLocation + '\'' +
+                ", address='" + address + '\'' +
+                ", marriageAnniversary='" + marriageAnniversary + '\'' +
+                '}';
+    }
+//    }
 
 }
