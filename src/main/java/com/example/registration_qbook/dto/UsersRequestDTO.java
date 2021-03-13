@@ -7,12 +7,11 @@ import java.sql.Date;
 @Data
 public class UsersRequestDTO {
 //    private long userId;
-    private String firstName;
-    private String lastName;
+//    private String firstName;
+//    private String lastName;
 //    private String email;
     private String phoneNo;
     private String password;
-  //  private String userName;
     private String gender;
     private java.sql.Date dateOfBirth;
     private String img;

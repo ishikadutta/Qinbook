@@ -33,7 +33,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     public static Properties getPropertiesOfKafka(){
         Properties props = new Properties();
-        props.put("bootstrap.servers","10.177.68.98:9092");
+        props.put("bootstrap.servers","10.177.68.18:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("linger.ms", 1);
@@ -65,6 +65,7 @@ public class RegisterServiceImpl implements RegisterService {
         }
         else{
             BeanUtils.copyProperties(userRequestDTO, users);
+            BeanUtils.copyProperties(userRequestDTO,userDetails);
            String hashedpassword = CustomHash.hashString(userRequestDTO.getPassword());
            hashedpassword = CustomHash.hashString(hashedpassword);
            System.out.println(hashedpassword);
@@ -74,6 +75,9 @@ public class RegisterServiceImpl implements RegisterService {
             loginClient.insertIntoLogin(username[0],hashedpassword);
             userDetails.setUserName(username[0]);
             userDetails.setQuinbookJoinDate(LocalDate.now().toString());
+            userDetails.setFirstName(userRequestDTO.getFirstName());
+            userDetails.setLastName(userRequestDTO.getLastName());
+
             users.setUserName(username[0]);
             Users savedUsers = userRepository.save(users);
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
@@ -160,7 +164,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public List<EventResponseDTO> getEventDetails(List<String> userNameList) {
 
-      //  List<String> userNameList = requestDTO.getUserNameList();
+       // List<String> userNameList = requestDTO.getUserNameList();
         List<EventResponseDTO> responseDTOList = new ArrayList<>();
         List<Users> usersWithBirthday = userRepository.findUsersWithBirthday();
         List<UserDetails> usersWithAnniversary = userDetailsRepository.findUsersWithAnniversary();
@@ -180,7 +184,7 @@ public class RegisterServiceImpl implements RegisterService {
                 String comp1 = s[1] + s[2];
                 String comp2 = s2[1] + s2[2];
                 if (comp1.equals(comp2)) {
-                    responseDTO.setEventType("Happy Birthday"); //eventBirthday
+                    responseDTO.setEventType(" Birthday"); //eventBirthday
                 }
                 int year1 = Integer.valueOf(s[0]);
                 int year2 = Integer.valueOf(s2[0]);
@@ -208,7 +212,7 @@ public class RegisterServiceImpl implements RegisterService {
                 String comp1 = s[1] + s[2];
                 String comp2 = s2[1] + s2[2];
                 if (comp1.equals(comp2)) {
-                    responseDTO.setEventType("Happy Marriage Anniversary"); //eventAnniversary
+                    responseDTO.setEventType(" Marriage Anniversary"); //eventAnniversary
                 }
                 int year1 = Integer.valueOf(s[0]);
                 int year2 = Integer.valueOf(s2[0]);

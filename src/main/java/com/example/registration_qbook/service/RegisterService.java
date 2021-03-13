@@ -16,5 +16,5 @@ public interface RegisterService {
 
     UpdateResponseDTO updateUserByUsername(String userName, UsersRequestDTO usersRequestDTO);
 
-    List<EventResponseDTO> getEventDetails(List<String> userNameList);
+    List<EventResponseDTO> getEventDetails(List<String> userList);
 }

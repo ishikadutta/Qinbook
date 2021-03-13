@@ -12,7 +12,7 @@ public class UsersResponseDto {
 //    private String email;
     private String phoneNo;
     private String password;
- //   private String userName;
+   private String userName;
     private String gender;
     private java.sql.Date dateOfBirth;
     private String img;

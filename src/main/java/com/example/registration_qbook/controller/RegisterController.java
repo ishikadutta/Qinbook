@@ -50,10 +50,10 @@ public class RegisterController {
         return registerService.updateUserByUsername(userName,usersRequestDTO);
     }
 
-    @GetMapping("/events")
-    public List<EventResponseDTO> getEventDetails(@RequestParam List<String> userNameList)
+    @PostMapping("/events")
+    public List<EventResponseDTO> getEventDetails(@RequestBody List<String> userList)
     {
-        return registerService.getEventDetails(userNameList);
+        return registerService.getEventDetails(userList);
     }
 
 
