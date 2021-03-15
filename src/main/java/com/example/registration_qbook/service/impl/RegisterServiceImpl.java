@@ -33,7 +33,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     public static Properties getPropertiesOfKafka(){
         Properties props = new Properties();
-        props.put("bootstrap.servers","10.177.68.18:9092");
+        props.put("bootstrap.servers","10.177.68.81:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("linger.ms", 1);
@@ -82,6 +82,7 @@ public class RegisterServiceImpl implements RegisterService {
             Users savedUsers = userRepository.save(users);
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
             responseDTO.setMessage("Registration successful");
+            responseDTO.setUserName(username[0]);
             kafkaMethod(savedUsers2);
         }
         return responseDTO;
