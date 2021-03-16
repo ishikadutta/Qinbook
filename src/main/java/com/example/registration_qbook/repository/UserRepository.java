@@ -29,4 +29,6 @@ public interface UserRepository extends CrudRepository<Users,Long> {
     @Query(value="SELECT AGE(CURRENT_DATE,date_of_birth) from users where user_name=?1", nativeQuery = true)
     int findAge(String userName);
 
+    @Query(value= "Select * from users where user_name = ?1", nativeQuery = true)
+    Users getAllUsersByUsername(String s);
 }

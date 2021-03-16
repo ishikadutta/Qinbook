@@ -33,7 +33,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     public static Properties getPropertiesOfKafka(){
         Properties props = new Properties();
-        props.put("bootstrap.servers","10.177.68.81:9092");
+        props.put("bootstrap.servers","10.177.68.110:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("linger.ms", 1);
@@ -55,24 +55,23 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public RegisterResponseDTO registerUser(RegisterRequestDTO userRequestDTO) {
-    Users users = new Users();
-    UserDetails userDetails = new UserDetails();
+        Users users = new Users();
+        UserDetails userDetails = new UserDetails();
         System.out.println(userRequestDTO);
-    RegisterResponseDTO responseDTO = new RegisterResponseDTO();
-        Users emailList =  userRepository.getAllUsersByEmail(userRequestDTO.getEmail());
-        if(emailList!=null){
-            responseDTO.setMessage("Email already exists");
+        RegisterResponseDTO responseDTO = new RegisterResponseDTO();
+        String[] username = userRequestDTO.getEmail().split("@",-1);
+        Users userNameList = userRepository.getAllUsersByUsername(username[0]);
+        if(userNameList != null){
+            responseDTO.setMessage("Username already Exists");
         }
         else{
             BeanUtils.copyProperties(userRequestDTO, users);
             BeanUtils.copyProperties(userRequestDTO,userDetails);
-           String hashedpassword = CustomHash.hashString(userRequestDTO.getPassword());
-           hashedpassword = CustomHash.hashString(hashedpassword);
-           System.out.println(hashedpassword);
-            // String password = userRequestDTO.getPassword();
-            // users.setPassword(password);
-            String[] username = userRequestDTO.getEmail().split("@",-1);
-            loginClient.insertIntoLogin(username[0],hashedpassword);
+           String hashedPassword = CustomHash.hashString(userRequestDTO.getPassword());
+           hashedPassword = CustomHash.hashString(hashedPassword);
+           System.out.println(hashedPassword);
+            //feignclient
+            loginClient.insertIntoLogin(username[0],hashedPassword);
             userDetails.setUserName(username[0]);
             userDetails.setQuinbookJoinDate(LocalDate.now().toString());
             userDetails.setFirstName(userRequestDTO.getFirstName());
@@ -83,6 +82,7 @@ public class RegisterServiceImpl implements RegisterService {
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
             responseDTO.setMessage("Registration successful");
             responseDTO.setUserName(username[0]);
+            //kafka
             kafkaMethod(savedUsers2);
         }
         return responseDTO;
