@@ -61,8 +61,11 @@ public class RegisterServiceImpl implements RegisterService {
         RegisterResponseDTO responseDTO = new RegisterResponseDTO();
         String[] username = userRequestDTO.getEmail().split("@",-1);
         Users userNameList = userRepository.getAllUsersByUsername(username[0]);
-        if(userNameList != null){
+        if(userNameList.getUserName() != null){
+//            System.out.println(userNameList.getUserName());
+//            System.out.println(userNameList.getLastName());
             responseDTO.setMessage("Username already Exists");
+           // responseDTO.setUserName();
         }
         else{
             BeanUtils.copyProperties(userRequestDTO, users);
@@ -70,8 +73,7 @@ public class RegisterServiceImpl implements RegisterService {
            String hashedPassword = CustomHash.hashString(userRequestDTO.getPassword());
            hashedPassword = CustomHash.hashString(hashedPassword);
            System.out.println(hashedPassword);
-            //feignclient
-            loginClient.insertIntoLogin(username[0],hashedPassword);
+           loginClient.insertIntoLogin(username[0],hashedPassword); //feignclient
             userDetails.setUserName(username[0]);
             userDetails.setQuinbookJoinDate(LocalDate.now().toString());
             userDetails.setFirstName(userRequestDTO.getFirstName());
@@ -82,8 +84,7 @@ public class RegisterServiceImpl implements RegisterService {
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
             responseDTO.setMessage("Registration successful");
             responseDTO.setUserName(username[0]);
-            //kafka
-            kafkaMethod(savedUsers2);
+            kafkaMethod(savedUsers2);  //kafka
         }
         return responseDTO;
     }
@@ -178,8 +179,8 @@ public class RegisterServiceImpl implements RegisterService {
                 Users userDetails = userRepository.findDetailsByUsername(user.getUserName());
                 LocalDate date = LocalDate.now();
                 java.sql.Date userDate = userDetails.getDateOfBirth();
-                System.out.println("d " + date);
-                System.out.println("ud " + userDate);
+//                System.out.println("d " + date);
+//                System.out.println("ud " + userDate);
                 String[] s = date.toString().split("-", 3);
                 String[] s2 = userDate.toString().split("-", 3);
                 String comp1 = s[1] + s[2];

@@ -1,0 +1,24 @@
+[
+{
+"userId": 1,
+"firstName": "ishika1",
+"lastName": "dutta1",
+"email": "ishika1@gmail.com",
+"phoneNo": "1234567890",
+"userName": "ishika1",
+"gender": "F",
+"dateOfBirth": "2010-03-17",
+"img": ""
+},
+{
+"userId": 2,
+"firstName": "ishika2",
+"lastName": "dutta2",
+"email": "ishika2@gmail.com",
+"phoneNo": "1234567890",
+"userName": "ishika2",
+"gender": "F",
+"dateOfBirth": "2017-03-17",
+"img": ""
+}
+]
