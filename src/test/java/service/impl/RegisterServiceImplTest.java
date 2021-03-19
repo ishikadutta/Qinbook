@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doNothing;
+
 @RunWith(MockitoJUnitRunner.class)
  class RegisterServiceImplTest {
 
@@ -50,10 +53,8 @@ import static org.junit.jupiter.api.Assertions.*;
         ObjectMapper objectMapper = new ObjectMapper();
 
         Users userObject = null;
-        Users userObject2 = null;
         try{
             userObject = objectMapper.readValue(new URL("file:src/test/resources/register.mock"),Users.class);
-            userObject2 = objectMapper.readValue(new URL("file:src/test/resources/newRegister.mock"),Users.class);
         }
         catch (IOException e){
             e.printStackTrace();
@@ -76,10 +77,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
         Mockito.verify(userRepository).getAllUsersByUsername("ishika");
 
-
-
-
-
     }
 
     @Test
@@ -88,10 +85,7 @@ import static org.junit.jupiter.api.Assertions.*;
         Users userObject2 = null;
 
         userObject2 = objectMapper.readValue(new URL("file:src/test/resources/newRegister.mock"),Users.class);
-
-
         Mockito.when(userRepository.getAllUsersByUsername("ravi")).thenReturn(userObject2);
-
         RegisterRequestDTO registerRequestDTO2 = new RegisterRequestDTO();
         registerRequestDTO2.setEmail("ravi@gmail.com");
         registerRequestDTO2.setDateOfBirth(new Date(2010-05-11));
@@ -166,6 +160,24 @@ import static org.junit.jupiter.api.Assertions.*;
         assertEquals(usersResponseDto.getAddress(),"");
         assertEquals(usersResponseDto.getMarriageAnniversary(),null);
         assertEquals(usersResponseDto.getHobbies(), "Reading");
+
+    }
+
+    @Test
+    void deleteByUserName() throws IOException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        Users userMockObject = null;
+           // userMockObject = objectMapper.readValue(new URL("file:src/test/resources/register.mock"), Users.class);
+        UserDetails userDetailsMockObject = objectMapper.readValue(new URL("file:src/test/resources/getProfile.mock"),UserDetails.class);
+
+      //  Mockito.when(userRepository.deleteByUsername("ishika1")).thenReturn(null);
+      //  Mockito.doThrow(new Exception()).doNothing().when(userRepository.deleteByUsername("ishika1")).methodName();
+      //  Mockito.when(userRepository.findDetailsByUsername("ishika1")).thenReturn(userMockObject);
+        Mockito.when(userDetailsRepository.findByUsername("ishika")).thenReturn(userDetailsMockObject);
+        doNothing().when(userRepository).deleteByUsername("ishika");
+        doNothing().when(userDetailsRepository).deleteByUsername("ishika");
+      //  Mockito.when(userDetailsRepository.getAllUserDetails("ishika")).thenReturn(userDetailsMockObject);
+        registerService.deleteByUsername("ishika");
 
     }
 
@@ -246,6 +258,68 @@ import static org.junit.jupiter.api.Assertions.*;
         assertEquals(eventResponseDTO.get(1).getUserName(),"ishika2");
         assertEquals(eventResponseDTO.get(1).getFullName(),"ishika2 dutta2");
 
+
+    }
+
+    @Test
+    void getEventDetailsForAnniversary() throws IOException, ParseException{
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, UserDetails>> userListMockObject = null;
+        List<UserDetails> userDetailsList = new ArrayList<>();
+        userListMockObject = objectMapper.readValue(new URL("file:src/test/resources/anniversary.mock"),ArrayList.class);
+        for(Map<String, UserDetails> objectMap: userListMockObject){
+            UserDetails userDetails = new UserDetails();
+            userDetails.setUserId(Long.parseLong(objectMap.get("userId")+""));
+            userDetails.setUserName(String.valueOf(objectMap.get("userName")));
+            userDetails.setImg(objectMap.get("img") + "");
+//            userDetails.setGender(objectMap.get("gender") + "");
+            // users.setDateOfBirth(objectMap.get("dateOfBirth"));
+//            userDetails.setPhoneNo(objectMap.get("phoneNo")+ "");
+            userDetails.setFirstName(objectMap.get("firstName")+"");
+            userDetails.setLastName(objectMap.get("lastName")+"");
+//            userDetails.setEmail(objectMap.get("email")+"");
+            userDetails.setImg(objectMap.get("img")+"");
+            userDetails.setRelationshipStatus(objectMap.get("relationshipStatus")+"");
+            userDetails.setEducation10(objectMap.get("education10")+"");
+            userDetails.setEducation12(objectMap.get("education12")+"");
+            userDetails.setEducationUni(objectMap.get("educationUni")+"");
+            userDetails.setJobProfile(objectMap.get("jobProfile")+"");
+            userDetails.setCompanyName(objectMap.get("companyName")+"");
+//            java.util.Date date = new SimpleDateFormat("YYYY-MM-DD").parse(String.valueOf(objectMap.get("jobStartDate")));
+//            userDetails.setJobStartDate(new Date(date.getTime()) );
+//            java.util.Date date2 = new SimpleDateFormat("YYYY-MM-DD").parse(String.valueOf(objectMap.get("jobEndDate")));
+//            userDetails.setJobEndDate(new Date(date2.getTime()));
+            java.util.Date date3 = new SimpleDateFormat("YYYY-MM-DD").parse(String.valueOf(objectMap.get("marriageAnniversary")));
+            userDetails.setMarriageAnniversary(new Date( date3.getTime() ) );
+            userDetailsList.add(userDetails);
+        }
+
+        Mockito.when(userDetailsRepository.findUsersWithAnniversary()).thenReturn(userDetailsList);
+
+        UserDetails userMockObject = null;
+        UserDetails userMockObject1 = null;
+
+
+        userMockObject = objectMapper.readValue(new URL("file:src/test/resources/details3.mock"), UserDetails.class);
+        userMockObject1 = objectMapper.readValue(new URL("file:src/test/resources/details4.mock"), UserDetails.class);
+        Mockito.when(userDetailsRepository.findByUsername("ishika1")).thenReturn(userMockObject);
+        Mockito.when(userDetailsRepository.findByUsername("ishika2")).thenReturn(userMockObject1);
+
+        List<String> list = new ArrayList<>();
+        list.add("ishika1");
+        list.add("ishika2");
+
+        List<EventResponseDTO> eventResponseDTO = registerService.getEventDetails(list);
+        assertEquals(eventResponseDTO.get(0).getEventType()," Marriage Anniversary");
+        assertEquals(eventResponseDTO.get(0).getImg(),"");
+        assertEquals(eventResponseDTO.get(0).getUserName(),"ishika1");
+        assertEquals(eventResponseDTO.get(0).getFullName(),"ishika1 dutta1");
+
+        assertEquals(eventResponseDTO.get(1).getEventType()," Marriage Anniversary");
+        assertEquals(eventResponseDTO.get(1).getImg(),"");
+        assertEquals(eventResponseDTO.get(1).getUserName(),"ishika2");
+        assertEquals(eventResponseDTO.get(1).getFullName(),"ishika2 dutta2");
 
     }
 

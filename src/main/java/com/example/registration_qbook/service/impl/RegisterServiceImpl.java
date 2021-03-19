@@ -62,10 +62,7 @@ public class RegisterServiceImpl implements RegisterService {
         String[] username = userRequestDTO.getEmail().split("@",-1);
         Users userNameList = userRepository.getAllUsersByUsername(username[0]);
         if(userNameList.getUserName() != null){
-//            System.out.println(userNameList.getUserName());
-//            System.out.println(userNameList.getLastName());
             responseDTO.setMessage("Username already Exists");
-           // responseDTO.setUserName();
         }
         else{
             BeanUtils.copyProperties(userRequestDTO, users);
@@ -73,7 +70,7 @@ public class RegisterServiceImpl implements RegisterService {
            String hashedPassword = CustomHash.hashString(userRequestDTO.getPassword());
            hashedPassword = CustomHash.hashString(hashedPassword);
            System.out.println(hashedPassword);
-           loginClient.insertIntoLogin(username[0],hashedPassword); //feignclient
+         //  loginClient.insertIntoLogin(username[0],hashedPassword); //feignclient
             userDetails.setUserName(username[0]);
             userDetails.setQuinbookJoinDate(LocalDate.now().toString());
             userDetails.setFirstName(userRequestDTO.getFirstName());
@@ -84,7 +81,7 @@ public class RegisterServiceImpl implements RegisterService {
             UserDetails savedUsers2 = userDetailsRepository.save(userDetails);
             responseDTO.setMessage("Registration successful");
             responseDTO.setUserName(username[0]);
-            kafkaMethod(savedUsers2);  //kafka
+       //     kafkaMethod(savedUsers2);  //kafka
         }
         return responseDTO;
     }
@@ -100,7 +97,6 @@ public class RegisterServiceImpl implements RegisterService {
         producer.send(new ProducerRecord<>("search", userString));
         producer.close();
     }
-
     @Override
     public FriendResponseDTO getProfileByUsername(String userName) {
         Users users = new Users();
@@ -114,7 +110,6 @@ public class RegisterServiceImpl implements RegisterService {
         response.setFullName(userDetails.getFirstName()+" "+userDetails.getLastName());
         return response;
     }
-
     @Override
     public UsersResponseDto getAllDetails(String userName) {
         Users users = new Users();
@@ -127,11 +122,9 @@ public class RegisterServiceImpl implements RegisterService {
         BeanUtils.copyProperties(allDetails,responseDto);
         return responseDto;
     }
-
     @Override
     @Transactional
     public DeleteResponseDTO deleteByUsername(String userName) {
-
         UserDetails userDetails = userDetailsRepository.findByUsername(userName);
         System.out.println(userDetails);
         DeleteResponseDTO deleteResponseDTO = new DeleteResponseDTO();
@@ -143,10 +136,8 @@ public class RegisterServiceImpl implements RegisterService {
         }
         return null;
     }
-
     @Override
     public UpdateResponseDTO updateUserByUsername(String userName, UsersRequestDTO usersRequestDTO) {
-
         Users users = new Users();
         UserDetails userDetails = new UserDetails();
         UserDetails userDetailsFromDb = userDetailsRepository.findByUsername(userName);
@@ -158,7 +149,7 @@ public class RegisterServiceImpl implements RegisterService {
         userRepository.save(usersFromDb);
         UpdateResponseDTO updateResponseDto = new UpdateResponseDTO();
         updateResponseDto.setMessage("Success");
-        kafkaMethod(savedDetails);
+    //    kafkaMethod(savedDetails);
         return updateResponseDto;
 
     }
@@ -220,9 +211,9 @@ public class RegisterServiceImpl implements RegisterService {
                 int year2 = Integer.valueOf(s2[0]);
                 int age = year1 - year2; //age
 
-                Users forFullName = userRepository.findDetailsByUsername(userDetails1.getUserName());
+             //   Users forFullName = userRepository.findDetailsByUsername(userDetails1.getUserName());
                 responseDTO.setImg(userDetails1.getImg()); //setImg
-                responseDTO.setFullName(forFullName.getFirstName() + " " + forFullName.getLastName()); //setFullName
+                responseDTO.setFullName(userDetails1.getFirstName() + " " + userDetails1.getLastName()); //setFullName
                 responseDTO.setUserName(userDetails1.getUserName()); //setUserName
                 responseDTO.setYears(age); //setAge
                 //    BeanUtils.copyProperties(userDetails,responseDTO);
